@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/relation.schema.json",
+  "title": "Typed directed relation (FINAL v2 §9.1 crosswalk; audit M-14, M-16, N-03, M-38)",
+  "x-mosaic-type": "relation",
+  "$comment": "Direction reads from_id <relation> to_id. Study relations require direction_basis (M-16); the direction itself is checked against the source by the G5 directional check in mosaic.gates.",
+  "allOf": [
+    {"$ref": "common.schema.json#/$defs/envelope"},
+    {"if": {"properties": {"layer": {"const": "study"}}, "required": ["layer"]},
+     "then": {"required": ["direction_basis", "witness_ids"], "properties": {"witness_ids": {"minItems": 1}}}},
+    {"if": {"properties": {"layer": {"const": "discovery"}}, "required": ["layer"]},
+     "then": {"properties": {"acceptance_tier": {"enum": ["candidate", "inspectable", "synthesis"]}}}},
+    {"if": {"properties": {"acceptance_tier": {"enum": ["accepted", "citable"]}}, "required": ["acceptance_tier"]},
+     "then": {"required": ["acceptance_basis"]}},
+    {"if": {"properties": {"acceptance_basis": {"const": "human_adjudication"}}, "required": ["acceptance_basis"]},
+     "then": {"required": ["adjudication"]}}
+  ],
+  "type": "object",
+  "required": ["relation", "layer", "from_id", "to_id", "witness_ids", "validation_status", "acceptance_tier", "candidate_origin"],
+  "properties": {
+    "type": {"const": "relation"},
+    "schema_version": {"const": "mosaic.relation/1"},
+    "source_package_id": true, "created_by": true, "recipe_id": true, "provenance_ids": true,
+    "status": {"enum": ["materialized", "stale", "superseded"]},
+    "relation": {"enum": [
+      "replicates", "extends", "reuses_measure_from", "validates_measure_used_in", "validates_manipulation_used_in",
+      "alternative_analysis_of", "shares_materials_with", "reuses_sample_from", "contrasts_with", "supports",
+      "measured_by", "operationalizes", "derived_from", "tested_in", "reports", "uses_instrument_version",
+      "administered_to", "has_condition", "precedes", "adapted_from",
+      "cites", "reports_prior_claim",
+      "candidate_equivalent", "similar_to", "co_cited_with", "possible_bridge"]},
+    "layer": {"enum": ["study", "scientific", "scholarly", "discovery", "provenance"]},
+    "from_id": {"$ref": "common.schema.json#/$defs/local_id"},
+    "to_id": {"$ref": "common.schema.json#/$defs/local_id"},
+    "symmetric": {"type": "boolean"},
+    "direction_basis": {"type": "string", "minLength": 1},
+    "scope": {"type": "object", "patternProperties": {"^[a-z_]+_id$": {"oneOf": [{"$ref": "common.schema.json#/$defs/local_id"}, {"type": "null"}]}}, "additionalProperties": false},
+    "witness_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "common.schema.json#/$defs/witness_ref"}},
+    "validation_status": {"enum": ["candidate", "mechanically_valid", "needs_review", "accepted", "rejected"]},
+    "acceptance_tier": {"enum": ["candidate", "inspectable", "accepted", "citable", "synthesis"]},
+    "trust_tier": {"enum": ["factual", "discovery_hypothesis"]},
+    "acceptance_basis": {"enum": ["qualified_recipe", "human_adjudication"]},
+    "adjudication": {"$ref": "assertion.schema.json#/properties/adjudication"},
+    "candidate_origin": {"$ref": "assertion.schema.json#/properties/candidate_origin"},
+    "flags": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

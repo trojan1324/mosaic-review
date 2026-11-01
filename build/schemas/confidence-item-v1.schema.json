@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/confidence-item-v1.schema.json",
+  "x-mosaic-type": null,
+  "title": "Experimental precision-first evidence item",
+  "type": "object",
+  "required": ["id", "kind", "status", "value"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "paragraph_id": {"type": ["string", "null"]},
+    "kind": {"type": "string", "minLength": 1},
+    "status": {"enum": ["extracted", "not_extracted"]},
+    "value": {"type": ["string", "null"], "minLength": 1},
+    "reason": {"type": "string", "minLength": 1},
+    "semantic_acceptance": {"const": "not_established"},
+    "citation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["work_id", "doi", "title", "year"],
+      "properties": {
+        "work_id": {"type": "string", "minLength": 1},
+        "doi": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "year": {"type": "integer", "minimum": 1500, "maximum": 2200}
+      }
+    },
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["passage_id", "work_id", "source_sha256", "page_index", "section", "study", "start", "end", "quote"],
+      "properties": {
+        "passage_id": {"type": "string", "minLength": 1},
+        "work_id": {"type": "string", "minLength": 1},
+        "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "page_index": {"type": "integer", "minimum": 0},
+        "section": {"type": "string", "minLength": 1},
+        "study": {"type": "string", "minLength": 1},
+        "start": {"type": "integer", "minimum": 0},
+        "end": {"type": "integer", "minimum": 1},
+        "quote": {"type": "string", "minLength": 1}
+      }
+    }
+  },
+  "allOf": [
+    {"if": {"properties": {"status": {"const": "extracted"}}},
+     "then": {"required": ["evidence", "citation"], "properties": {"value": {"type": "string"}}}},
+    {"if": {"properties": {"status": {"const": "not_extracted"}}},
+     "then": {"required": ["reason"], "properties": {"value": {"type": "null"}}}}
+  ]
+}

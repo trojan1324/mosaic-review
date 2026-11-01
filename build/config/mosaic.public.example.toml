@@ -1,0 +1,27 @@
+# Public build scaffolding, not yet a complete inference/serve installer.
+# Every source must be explicitly listed. No directory is crawled or uploaded.
+version = "mosaic-public-build/v1"
+profile = "demo"
+
+[sources]
+root = "example-data/pdfs"
+files = ["fictional-example.pdf"]
+permission = "fictional_fixture"
+
+[run]
+root = "run/public-demo"
+
+[runtime]
+kind = "recorded_replay"
+
+[view]
+columns = ["title", "authors", "journal", "year"]
+default_screen = "papers"
+sort = "distinct_article_count_desc"
+
+[serve]
+port = 8798
+
+[jev]
+enabled = false
+replay_only = true

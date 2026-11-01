@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/page.schema.json",
+  "title": "Physical PDF page identity, geometry, quality signals and render lineage (FINAL v2 §3.3, §4.1, §5.2; audit M-02, M-10, M-57)",
+  "x-mosaic-type": "page",
+  "allOf": [{"$ref": "common.schema.json#/$defs/envelope"}],
+  "type": "object",
+  "required": ["source_id", "physical_index", "display_ordinal", "printed_label", "geometry", "signals"],
+  "properties": {
+    "type": {"const": "page"},
+    "schema_version": {"const": "mosaic.page/1"},
+    "source_package_id": true, "created_by": true, "recipe_id": true, "provenance_ids": true,
+    "status": {"enum": ["captured", "quarantined"]},
+    "source_id": {"$ref": "common.schema.json#/$defs/object_ref"},
+    "physical_index": {"type": "integer", "minimum": 0},
+    "display_ordinal": {"type": "integer", "minimum": 1},
+    "printed_label": {"$ref": "common.schema.json#/$defs/printed_label"},
+    "label_candidates": {
+      "type": "array",
+      "items": {"type": "object", "required": ["position", "text"],
+                "properties": {"position": {"enum": ["top_left", "top_center", "top_right", "bottom_left", "bottom_center", "bottom_right"]},
+                               "text": {"type": "string"}, "bbox": {"$ref": "common.schema.json#/$defs/bbox"}},
+                "additionalProperties": false}
+    },
+    "geometry": {
+      "type": "object", "required": ["width", "height", "rotation"],
+      "properties": {"width": {"type": "number", "exclusiveMinimum": 0}, "height": {"type": "number", "exclusiveMinimum": 0},
+                     "rotation": {"enum": [0, 90, 180, 270]}, "mediabox": {"$ref": "common.schema.json#/$defs/bbox"},
+                     "cropbox": {"$ref": "common.schema.json#/$defs/bbox"},
+                     "horizontal_rule_boxes": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/bbox"}}},
+      "additionalProperties": false
+    },
+    "signals": {
+      "type": "object",
+      "required": ["char_count", "nonempty_span_count", "zero_text", "replacement_char_ratio", "private_use_char_count", "image_count", "drawing_count", "runon_tokens", "reading_order_confidence"],
+      "properties": {
+        "char_count": {"type": "integer", "minimum": 0},
+        "nonempty_span_count": {"type": "integer", "minimum": 0},
+        "zero_text": {"type": "boolean"},
+        "replacement_char_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "private_use_char_count": {"type": "integer", "minimum": 0},
+        "image_count": {"type": "integer", "minimum": 0},
+        "drawing_count": {"type": "integer", "minimum": 0},
+        "runon_tokens": {"type": "integer", "minimum": 0},
+        "reading_order_confidence": {"enum": ["single_column", "geometry_consistent", "requires_visual_review", "unresolved"]},
+        "recommended_engine": {"type": "string"},
+        "visually_flagged": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "renders": {
+      "type": "array",
+      "items": {"type": "object", "required": ["dpi", "sha256", "relative_path"],
+                "properties": {"dpi": {"enum": [150, 300]}, "sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+                               "relative_path": {"type": "string"}},
+                "additionalProperties": false}
+    },
+    "char_geometry_sidecar": {"type": ["object", "null"],
+                              "properties": {"sha256": {"$ref": "common.schema.json#/$defs/sha256"}, "relative_path": {"type": "string"}, "chars": {"type": "integer"},
+                                             "format": {"type": "string"}},
+                              "additionalProperties": false}
+  },
+  "additionalProperties": false
+}

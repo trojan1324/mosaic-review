@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/span-catalog.schema.json",
+  "title": "Deterministic span catalog built from Layer-1 output before any model call (FINAL v2 §6.3; audit M-65)",
+  "x-mosaic-type": null,
+  "$comment": "A per-unit selection schema is generated from each catalog with the span IDs as an enum (mosaic.inventory.span_catalog.selection_schema), so an invented ID is a schema violation at generation time.",
+  "type": "object",
+  "required": ["catalog_version", "text_region_id", "text_sha256", "built_by", "entries"],
+  "properties": {
+    "catalog_version": {"const": "mosaic.span-catalog/1"},
+    "text_region_id": {"$ref": "common.schema.json#/$defs/object_ref"},
+    "text_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "built_by": {"$ref": "common.schema.json#/$defs/actor"},
+    "entries": {
+      "type": "array", "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": ["span_id", "kind", "start", "end", "text_sha256"],
+        "properties": {
+          "span_id": {"type": "string", "pattern": "^span:[0-9a-f]{12}@[0-9]+-[0-9]+$"},
+          "kind": {"enum": ["whole_unit_minus_marker", "numbered_parenthetical", "quoted_substring", "table_cell", "figure_caption", "unclassified"]},
+          "start": {"type": "integer", "minimum": 0},
+          "end": {"type": "integer", "minimum": 1},
+          "text_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+          "block_index": {"type": "integer", "minimum": 0},
+          "needs_review": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

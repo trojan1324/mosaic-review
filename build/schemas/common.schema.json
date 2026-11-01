@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/common.schema.json",
+  "title": "Shared definitions for MOSAIC package objects (FINAL v2 §4.1, §4.3, C17)",
+  "x-mosaic-type": null,
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "object_type": {
+      "enum": ["manifest", "source", "page", "text-region", "table", "figure-equation", "study", "assertion",
+               "relation", "witness", "disposition", "validation-event", "projection", "dependency-edge"]
+    },
+    "object_ref": {
+      "type": "string",
+      "pattern": "^(manifest|source|page|text-region|table|figure-equation|study|assertion|relation|witness|disposition|validation-event|projection|dependency-edge)-[0-9a-f]{64}$"
+    },
+    "witness_ref": {
+      "description": "A witness object; only witnesses can support an assertion or relation (T12)",
+      "type": "string",
+      "pattern": "^witness-[0-9a-f]{64}$"
+    },
+    "local_id": {
+      "description": "Package-namespace identifier of a scientific entity, e.g. study:S2 or sample:S2/analyzed",
+      "type": "string",
+      "pattern": "^[a-z_]+:[A-Za-z0-9._/\\-]+$"
+    },
+    "package_id": {"type": "string", "pattern": "^package:[A-Za-z0-9._\\-]+$"},
+    "utc_timestamp": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "actor": {
+      "type": "object",
+      "required": ["kind", "module", "version"],
+      "properties": {
+        "kind": {"enum": ["deterministic", "human", "jev_advisory", "llm_fixture_replay", "subscription", "carc_llm"]},
+        "module": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "name": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "envelope": {
+      "type": "object",
+      "required": ["type", "schema_version", "source_package_id", "created_by", "recipe_id", "provenance_ids", "status"],
+      "properties": {
+        "type": {"$ref": "#/$defs/object_type"},
+        "schema_version": {"type": "string", "pattern": "^mosaic\\.[a-z-]+/[0-9]+$"},
+        "source_package_id": {"$ref": "#/$defs/package_id"},
+        "created_by": {"$ref": "#/$defs/actor"},
+        "recipe_id": {"type": "string", "pattern": "^recipe-[0-9a-f]{64}$"},
+        "provenance_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "status": {"type": "string", "minLength": 1}
+      }
+    },
+    "printed_label": {
+      "type": "object",
+      "required": ["value", "status"],
+      "properties": {
+        "value": {"type": ["string", "null"]},
+        "status": {"enum": ["verified", "inferred", "ambiguous_or_conflicting", "none"]},
+        "position": {"enum": ["top_left", "top_center", "top_right", "bottom_left", "bottom_center", "bottom_right", null]},
+        "section": {"type": ["string", "null"]},
+        "method": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "page_identity": {
+      "type": "object",
+      "required": ["physical_index", "display_ordinal", "printed_label"],
+      "properties": {
+        "page_id": {"$ref": "#/$defs/object_ref"},
+        "physical_index": {"type": "integer", "minimum": 0},
+        "display_ordinal": {"type": "integer", "minimum": 1},
+        "printed_label": {"$ref": "#/$defs/printed_label"}
+      },
+      "additionalProperties": false
+    },
+    "bbox": {
+      "description": "top-left-origin PDF points after rotation/crop normalization: [x0, y0, x1, y1]",
+      "type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number"}
+    },
+    "codepoint_span": {
+      "type": "object",
+      "required": ["text_artifact_id", "start_codepoint", "end_codepoint"],
+      "properties": {
+        "text_artifact_id": {"$ref": "#/$defs/object_ref"},
+        "start_codepoint": {"type": "integer", "minimum": 0},
+        "end_codepoint": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "table_cell_locator": {
+      "type": "object",
+      "required": ["table_id", "row_index_or_path", "column_id", "header_path"],
+      "properties": {
+        "table_id": {"$ref": "#/$defs/object_ref"},
+        "row_index_or_path": {"oneOf": [{"type": "integer", "minimum": 0}, {"type": "array", "minItems": 1, "items": {"type": "string"}}]},
+        "column_id": {"type": "string", "minLength": 1},
+        "header_path": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "native_locator": {
+      "description": "Non-PDF locators (FINAL §3.2): DOCX paragraph/table cell, spreadsheet sheet/cell, XML element, data row, code line",
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {"enum": ["docx_paragraph", "docx_table_cell", "xlsx_cell", "xml_element", "data_row", "code_line"]},
+        "paragraph_index": {"type": "integer", "minimum": 0},
+        "table_index": {"type": "integer", "minimum": 0},
+        "row": {"type": "integer", "minimum": 0},
+        "column": {"type": "integer", "minimum": 0},
+        "sheet": {"type": "string"},
+        "cell": {"type": "string", "pattern": "^[A-Z]{1,3}[0-9]{1,7}$"},
+        "xpath": {"type": "string"},
+        "line": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "value": {
+      "description": "Numeric values keep lexical form plus typed decimal string (FINAL §4.1); never binary float as source text",
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {"enum": ["integer", "decimal", "interval", "text", "enum", "boolean", "entity_ref", "paraphrase"]},
+        "lexical": {"type": "string"},
+        "value": {"type": "string"},
+        "comparator": {"enum": ["eq", "lt", "le", "gt", "ge", "approximate"]},
+        "sign": {"enum": ["positive", "negative", "zero", "unsigned"]},
+        "unit": {"type": "string"},
+        "scale": {"type": "string"},
+        "statistic": {"type": "string"},
+        "lower": {"type": "string"},
+        "upper": {"type": "string"},
+        "level": {"type": "string"},
+        "ref": {"$ref": "#/$defs/local_id"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

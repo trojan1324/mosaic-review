@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/dependency-edge.schema.json",
+  "title": "Repair dependency graph edge (FINAL v2 §4.2 twelfth row, §10.2; audit M-50)",
+  "x-mosaic-type": "dependency-edge",
+  "allOf": [{"$ref": "common.schema.json#/$defs/envelope"}],
+  "type": "object",
+  "required": ["edge", "from_kind", "from_ref", "to_kind", "to_ref"],
+  "properties": {
+    "type": {"const": "dependency-edge"},
+    "schema_version": {"const": "mosaic.dependency-edge/1"},
+    "source_package_id": true, "created_by": true, "recipe_id": true, "provenance_ids": true,
+    "status": {"enum": ["active", "invalidated"]},
+    "edge": {"enum": ["derived_from", "projected_into"]},
+    "from_kind": {"enum": ["text_artifact", "witness", "assertion", "relation", "embedding", "graph_view"]},
+    "from_ref": {"type": "string", "minLength": 1},
+    "to_kind": {"enum": ["text_artifact", "witness", "assertion", "relation", "embedding", "graph_view"]},
+    "to_ref": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": false
+}

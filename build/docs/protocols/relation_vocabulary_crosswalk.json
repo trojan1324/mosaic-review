@@ -1,0 +1,41 @@
+{
+  "protocol_version": "mosaic.relation-crosswalk/1",
+  "source": "FINAL v2 §9.1 crosswalk table (audit M-14, N-03)",
+  "direction": "from_study <relation> to_study",
+  "vnext_study_relations": ["replicates", "extends", "reuses_measure_from", "validates_measure_used_in", "validates_manipulation_used_in",
+                            "alternative_analysis_of", "shares_materials_with", "reuses_sample_from", "contrasts_with", "supports"],
+  "symmetric": ["shares_materials_with"],
+  "crosswalk": {
+    "candidate.schema.json:study_links": {
+      "reuses_measure": {"to": "reuses_measure_from", "disposition": "direction made explicit"},
+      "validates_measure": {"to": "validates_measure_used_in", "disposition": "direction made explicit"},
+      "replicates": {"to": "replicates", "disposition": "same meaning"},
+      "extends": {"to": "extends", "disposition": "same meaning; direction checked at G5"},
+      "alternative_analysis": {"to": "alternative_analysis_of", "disposition": "direction made explicit"},
+      "shared_materials": {"to": "shares_materials_with", "disposition": "symmetric"}
+    },
+    "structure-v3.schema.json:study_relationships": {
+      "reuses_measure_from": {"to": "reuses_measure_from", "disposition": "same"},
+      "validates_measure_used_in": {"to": "validates_measure_used_in", "disposition": "same"},
+      "validates_manipulation_used_in": {"to": "validates_manipulation_used_in", "disposition": "same"},
+      "replicates": {"to": "replicates", "disposition": "same"},
+      "extends": {"to": "extends", "disposition": "same; direction checked at G5"},
+      "alternative_analysis_of": {"to": "alternative_analysis_of", "disposition": "same"},
+      "shares_materials_with": {"to": "shares_materials_with", "disposition": "same"}
+    },
+    "B:relation_type": {
+      "cites": {"to": null, "disposition": "not a study relation; scholarly-layer cites edge"},
+      "replicates": {"to": "replicates", "disposition": "same"},
+      "extends": {"to": "extends", "disposition": "same"},
+      "reuses_measure": {"to": "reuses_measure_from", "disposition": "direction made explicit"},
+      "supports": {"to": "supports", "disposition": "requires source statement or attributed review judgement"},
+      "contradicts": {"to": "contrasts_with", "disposition": "requires source statement or attributed review judgement"},
+      "moderates": {"to": null, "disposition": "not a study relation; analysis role of a variable"},
+      "same_construct_different_label": {"to": null, "disposition": "discovery-layer candidate_equivalent proposal (J7)"},
+      "secondary_report_of": {"to": null, "disposition": "assertion-level result_attribution = secondary_report"}
+    },
+    "FINAL v2 §9.1": {
+      "reuses-sample": {"to": "reuses_sample_from", "disposition": "added; B had no such value (N-03)"}
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/disposition.schema.json",
+  "title": "Coverage disposition of a page, region, unit, attachment or field family (FINAL v2 §4.2, G8; audit M-01, M-02, C-04, N-60)",
+  "x-mosaic-type": "disposition",
+  "allOf": [
+    {"$ref": "common.schema.json#/$defs/envelope"},
+    {"if": {"properties": {"disposition": {"enum": ["excluded", "failed", "blocked", "pending", "stalled", "stalled_in_staging", "unavailable_or_illegible", "quarantined"]}}, "required": ["disposition"]},
+     "then": {"required": ["reason"]}},
+    {"if": {"properties": {"disposition": {"const": "quarantined"}}, "required": ["disposition"]},
+     "then": {"required": ["quarantine"]}}
+  ],
+  "type": "object",
+  "required": ["subject_kind", "subject_ref", "disposition"],
+  "properties": {
+    "type": {"const": "disposition"},
+    "schema_version": {"const": "mosaic.disposition/1"},
+    "source_package_id": true, "created_by": true, "recipe_id": true, "provenance_ids": true,
+    "status": {"enum": ["recorded"]},
+    "subject_kind": {"enum": ["page", "docx_paragraph", "region", "unit", "attachment", "field_family", "source"]},
+    "subject_ref": {"type": "string", "minLength": 1},
+    "page_identity": {"$ref": "common.schema.json#/$defs/page_identity"},
+    "disposition": {"enum": ["processed", "excluded", "failed", "blocked", "pending", "stalled", "stalled_in_staging", "unavailable_or_illegible", "quarantined"]},
+    "reason": {"type": "string", "minLength": 1},
+    "quarantine": {
+      "description": "A garbled or failed artifact is kept with its hash before anything is removed; nothing is deleted (C-04)",
+      "type": "object", "required": ["content_sha256", "relative_path", "signal"],
+      "properties": {"content_sha256": {"$ref": "common.schema.json#/$defs/sha256"}, "relative_path": {"type": "string"},
+                     "signal": {"type": "string"}, "text_region_id": {"$ref": "common.schema.json#/$defs/object_ref"}},
+      "additionalProperties": false
+    },
+    "ocr": {
+      "type": "object", "required": ["status"],
+      "properties": {"status": {"enum": ["not_needed", "ocr_unavailable", "ocr_attempted_failed", "ocr_succeeded"]},
+                     "engine": {"type": ["string", "null"]}, "engine_version": {"type": ["string", "null"]},
+                     "text_region_id": {"$ref": "common.schema.json#/$defs/object_ref"}},
+      "additionalProperties": false
+    },
+    "signals": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,27 @@
+# Use an allowlisted public export as the build context.
+# Keep later local data, credentials, and downloaded runtimes out of image layers.
+.git
+.env
+.env.*
+**/.env
+**/.env.*
+.venv*
+**/__pycache__
+.pytest_cache
+.pytest-tmp*
+run
+scratch
+output
+corpus
+models
+wheelhouse
+*.pdf
+**/*.pdf
+*.safetensors
+**/*.safetensors
+*.gguf
+**/*.gguf
+*.pt
+**/*.pt
+*.pth
+**/*.pth

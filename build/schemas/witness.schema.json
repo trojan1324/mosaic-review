@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/witness.schema.json",
+  "title": "Witness (FINAL v2 §4.3; audit M-08, M-09, M-20, N-47)",
+  "x-mosaic-type": "witness",
+  "allOf": [{"$ref": "common.schema.json#/$defs/envelope"}],
+  "type": "object",
+  "required": ["witness_kind", "artifact_sha256", "source_id", "copied_text", "copied_text_sha256", "transcription_state", "attribution_role"],
+  "properties": {
+    "type": {"const": "witness"},
+    "schema_version": {"const": "mosaic.witness/1"},
+    "source_package_id": true, "created_by": true, "recipe_id": true, "provenance_ids": true,
+    "status": {"enum": ["materialized", "stale", "quarantined"]},
+    "witness_kind": {"enum": ["text_span", "table_cell", "visual_region", "native_locator"]},
+    "artifact_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "source_id": {"$ref": "common.schema.json#/$defs/object_ref"},
+    "page": {"oneOf": [{"$ref": "common.schema.json#/$defs/page_identity"}, {"type": "null"}]},
+    "native_locator": {"oneOf": [{"$ref": "common.schema.json#/$defs/native_locator"}, {"type": "null"}]},
+    "spans": {
+      "description": "Ordered, disjoint code-point spans; offsets are half-open [start,end) into an immutable text artifact",
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {"$ref": "common.schema.json#/$defs/codepoint_span"}
+    },
+    "join": {"enum": ["none", "adjacent_no_gap", "line_break", "omitted_material_marker"]},
+    "cell": {"$ref": "common.schema.json#/$defs/table_cell_locator"},
+    "geometry": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/bbox"}},
+    "copied_text": {"type": "string", "minLength": 1},
+    "copied_text_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "transcription_state": {"enum": ["native", "recognized", "visually_checked"]},
+    "attribution_role": {
+      "description": "Whose words the witness text is. Default vocabulary: the eleven populated values of K evidence.attribution_kind (N-47).",
+      "enum": ["author_claim", "author_summary_of_prior_work", "author_review_result", "quoted_practitioner",
+               "quoted_participant", "quoted_historical_actor", "author_result", "author_illustration",
+               "author_model", "author_synthesis", "author_report"]
+    },
+    "context_witness_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/witness_ref"}, "uniqueItems": true},
+    "retrieval_transform": {"type": "string"},
+    "legacy_id": {"type": "string", "pattern": "^legacy-utf16:[A-Za-z0-9_]+@[0-9]+-[0-9]+$"}
+  },
+  "$comment": "Conditional requirements below are also enforced in code (mosaic.validation.objects.check_witness); the pinned decoder ignores if/then/else (M-32).",
+  "if": {"properties": {"spans": {"minItems": 2}}, "required": ["spans"]},
+  "then": {"required": ["join"]},
+  "additionalProperties": false,
+  "dependentSchemas": {
+    "cell": {"properties": {"witness_kind": {"const": "table_cell"}}}
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/study.schema.json",
+  "title": "Study inventory entry (FINAL v2 §4.2, §6.1; audit M-58)",
+  "x-mosaic-type": "study",
+  "allOf": [
+    {"$ref": "common.schema.json#/$defs/envelope"},
+    {"if": {"properties": {"inventory_status": {"const": "ambiguous"}}, "required": ["inventory_status"]},
+     "then": {"required": ["ambiguity"]}}
+  ],
+  "type": "object",
+  "required": ["local_id", "label", "kind", "inventory_status", "boundary", "boundary_evidence"],
+  "properties": {
+    "type": {"const": "study"},
+    "schema_version": {"const": "mosaic.study/1"},
+    "source_package_id": true, "created_by": true, "recipe_id": true, "provenance_ids": true,
+    "status": {"enum": ["proposed", "adjudicated"]},
+    "local_id": {"type": "string", "pattern": "^study:[A-Za-z0-9._/\\-]+$"},
+    "label": {"type": "string", "minLength": 1},
+    "kind": {"enum": ["study", "substudy", "pilot", "pretest", "validation_sample", "replication", "supplemental_study", "analysis", "nonempirical_section", "paper_level"]},
+    "parent_local_id": {"oneOf": [{"type": "string", "pattern": "^study:"}, {"type": "null"}]},
+    "inventory_status": {"enum": ["discovered", "ambiguous", "adjudicated"]},
+    "ambiguity": {"type": "string", "minLength": 1},
+    "boundary": {
+      "type": "object", "required": ["regions"],
+      "properties": {"regions": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/codepoint_span"}},
+                     "physical_pages": {"type": "array", "items": {"type": "integer", "minimum": 0}, "uniqueItems": true}},
+      "additionalProperties": false
+    },
+    "boundary_evidence": {
+      "type": "array",
+      "items": {"type": "object", "required": ["kind", "text"],
+                "properties": {"kind": {"enum": ["heading", "table_of_contents", "section_tree", "fixture_candidate", "manual"]},
+                               "text": {"type": "string"}, "witness_id": {"$ref": "common.schema.json#/$defs/object_ref"}},
+                "additionalProperties": false}
+    },
+    "source_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "common.schema.json#/$defs/object_ref"}}
+  },
+  "additionalProperties": false
+}

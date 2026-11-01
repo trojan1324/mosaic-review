@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Citation map · MOSAIC</title><link rel="stylesheet" href="assets/fonts.css"><link rel="stylesheet" href="assets/tokens.css"><link rel="stylesheet" href="assets/components.css"><link rel="stylesheet" href="citation-map.css"></head>
+<body><div class="rp-app">
+<header class="rp-band"><a class="rp-band__brand" href="workspace.html"><img src="assets/mosaic-lockup-reversed.svg" alt="MOSAIC"></a>
+<nav class="rp-band__nav" aria-label="Main"><a class="rp-band__item" href="workspace.html">Start</a><a class="rp-band__item" href="measures.html">Measures</a><a class="rp-band__item" href="index.html#papers">Papers</a><a class="rp-band__item" href="measures.html#compare">Compare</a><a class="rp-band__item" href="measures.html#project">Project</a><a class="rp-band__item" href="citation-map.html" aria-current="page">Citations</a></nav></header>
+<main class="cm-content rp-stack rp-stack--lg">
+<section class="rp-sign"><div class="rp-sign__arrow" aria-hidden="true">↔</div><div class="rp-sign__cell rp-sign__cell--grow"><span class="rp-signlabel">Explore the reference network</span><h1 class="rp-sign__title">Follow an article. Find a connection.</h1></div></section>
+<p class="rp-lede">Explore references, articles that cite them, and connections through shared sources. Search reference text to find useful articles even when a cited work has not been resolved.</p>
+<form id="citation-search" class="cm-search">
+<label class="rp-label" for="citation-mode">Search in</label><select class="rp-input" id="citation-mode"><option value="works">Article titles and DOIs</option><option value="references">All reference text</option></select>
+<label class="rp-label" for="citation-q">Title, DOI, author, or reference wording</label><div><input class="rp-input" id="citation-q" type="search" placeholder="Search this local collection"><button class="rp-btn"><span class="rp-btn__label">Search</span><span class="rp-btn__arrow">→</span></button></div></form>
+<p id="citation-status" class="rp-caption" role="status">Checking the local citation index…</p>
+<section id="citation-results" class="rp-records" aria-label="Citation search matches"></section>
+<section id="citation-work" hidden></section></main></div>
+<script src="citation-map-core.js"></script><script src="citation-map.js"></script>
+</body></html>

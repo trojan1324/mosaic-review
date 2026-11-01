@@ -1,0 +1,19 @@
+{
+  "version": "mosaic-public-native-driver-profile/v1",
+  "model": {
+    "id": "replace-with-local-model-id",
+    "revision": "replace-with-immutable-model-revision",
+    "served_model_name": "public-local-candidate"
+  },
+  "source": {"permission_declaration": "user_declared_permitted"},
+  "driver": {
+    "candidate": "public-local-candidate-v1",
+    "run_id": "public-native-v1",
+    "max_measure_stages_per_paper": 1,
+    "max_request_seconds": 180,
+    "request_cap": 8,
+    "output_token_cap": 49152,
+    "wall_clock_cap_seconds": 1800,
+    "article_request_cap": 8
+  }
+}

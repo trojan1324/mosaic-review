@@ -1,0 +1,19 @@
+{
+  "version": "mosaic-public-model-declaration/v1",
+  "model": {
+    "id": "REPLACE-model-id",
+    "revision": "REPLACE-immutable-upstream-revision",
+    "tokenizer_path": "tokenizer.json",
+    "tokenizer_runtime_version": "REPLACE-installed-tokenizers-version",
+    "add_special_tokens": true
+  },
+  "runtime": {
+    "platform": "linux",
+    "container_digest": "REPLACE-actual-64-character-image-digest-without-sha256-prefix",
+    "wheels": [{"name": "REPLACE-exact-runtime-wheel-filename", "sha256": "REPLACE-wheel-sha256"}]
+  },
+  "hardware": {
+    "declared": {"accelerator": "REPLACE-actual-device-model-and-memory"},
+    "observed_linux_gpu_smoke_receipt": null
+  }
+}

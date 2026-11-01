@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/text-region.schema.json",
+  "title": "Immutable text artifact with blocks, lines and reading order (FINAL v2 §4.1-4.2; audit M-09, M-11)",
+  "x-mosaic-type": "text-region",
+  "allOf": [{"$ref": "common.schema.json#/$defs/envelope"}],
+  "type": "object",
+  "required": ["source_id", "derivation", "text", "text_sha256", "blocks"],
+  "properties": {
+    "type": {"const": "text-region"},
+    "schema_version": {"const": "mosaic.text-region/1"},
+    "source_package_id": true, "created_by": true, "recipe_id": true, "provenance_ids": true,
+    "status": {"enum": ["captured", "quarantined", "superseded"]},
+    "source_id": {"$ref": "common.schema.json#/$defs/object_ref"},
+    "page_id": {"oneOf": [{"$ref": "common.schema.json#/$defs/object_ref"}, {"type": "null"}]},
+    "derivation": {
+      "type": "object", "required": ["kind", "engine", "engine_version"],
+      "properties": {
+        "kind": {"enum": ["native_raw", "ocr_recognized", "normalized", "docx_body", "xlsx_cells"]},
+        "engine": {"type": "string"}, "engine_version": {"type": "string"},
+        "parent_text_region_id": {"oneOf": [{"$ref": "common.schema.json#/$defs/object_ref"}, {"type": "null"}]},
+        "transform": {"type": "string"},
+        "separator_policy": {"type": "string"},
+        "ocr_text_layer": {
+          "description": "Present only when the page meets the scanned-page rule, so its native text layer is taken as a scan's OCR layer, words another engine recognized from the page image, and witnesses on it are transcription_state recognized (D-163). `basis` states what met the rule; a born-digital page on a full-page background image meets it too. Names the PDF's creator and producer as its metadata states them.",
+          "type": "object", "required": ["pdf_creator", "pdf_producer", "basis"],
+          "properties": {"pdf_creator": {"type": ["string", "null"]}, "pdf_producer": {"type": ["string", "null"]},
+                         "basis": {"type": "string", "minLength": 1}},
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "text": {"type": "string"},
+    "text_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["block_index", "start", "end"],
+        "properties": {
+          "block_index": {"type": "integer", "minimum": 0},
+          "start": {"type": "integer", "minimum": 0},
+          "end": {"type": "integer", "minimum": 0},
+          "bbox": {"$ref": "common.schema.json#/$defs/bbox"},
+          "kind": {"enum": ["text", "image_placeholder", "paragraph", "table_cell", "cell"]},
+          "native_locator": {"$ref": "common.schema.json#/$defs/native_locator"},
+          "lines": {"type": "array", "items": {"type": "object", "required": ["start", "end"],
+                     "properties": {"start": {"type": "integer", "minimum": 0}, "end": {"type": "integer", "minimum": 0},
+                                    "bbox": {"$ref": "common.schema.json#/$defs/bbox"},
+                                    "fonts": {"type": "array", "items": {"type": "string"}},
+                                    "size": {"type": "number", "minimum": 0}, "bold": {"type": "boolean"}, "italic": {"type": "boolean"}},
+                     "additionalProperties": false}},
+          "legacy_unit_id": {"type": "string"},
+          "style": {"type": ["string", "null"], "description": "DOCX paragraph style id (w:pStyle)"},
+          "list_item": {"type": "boolean", "description": "DOCX paragraph with list numbering or a list style"},
+          "bold": {"type": "boolean", "description": "DOCX paragraph whose visible runs are all bold"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "glyph_flags": {
+      "description": "Present only when some character of the text has no faithful Unicode for its glyph: its code-point range [start, end) and why; `inline_image` marks each line of a block at whose height a small image sits between the block's text, a symbol set as a picture that the text lacks. Witnesses overlapping one are transcription_state recognized, so G2 asks for visual confirmation (D-166).",
+      "type": "array", "minItems": 1,
+      "items": {"type": "object", "required": ["start", "end", "reason"],
+                "properties": {"start": {"type": "integer", "minimum": 0}, "end": {"type": "integer", "minimum": 1},
+                               "reason": {"enum": ["replacement_character", "private_use", "control_character",
+                                                   "symbol_font_ascii", "symbol_font_whitespace", "inline_image"]}},
+                "additionalProperties": false}
+    },
+    "reading_order": {"type": "array", "items": {"type": "integer", "minimum": 0}, "uniqueItems": true},
+    "reading_order_method": {"type": "string"}
+  },
+  "additionalProperties": false
+}

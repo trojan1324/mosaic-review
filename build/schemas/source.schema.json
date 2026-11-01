@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/source.schema.json",
+  "title": "Source artifact with work/version identity and membership (FINAL v2 §3.1-3.2; audit C-03, M-07, N-50)",
+  "x-mosaic-type": "source",
+  "allOf": [{"$ref": "common.schema.json#/$defs/envelope"}],
+  "type": "object",
+  "required": ["artifact", "membership", "work", "version", "rights"],
+  "properties": {
+    "type": {"const": "source"},
+    "schema_version": {"const": "mosaic.source/1"},
+    "source_package_id": true, "created_by": true, "recipe_id": true, "provenance_ids": true,
+    "status": {"enum": ["registered", "quarantined"]},
+    "artifact": {
+      "type": "object",
+      "required": ["sha256", "bytes", "media_type", "original_name"],
+      "properties": {
+        "sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+        "bytes": {"type": "integer", "minimum": 1},
+        "media_type": {"enum": ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/plain", "text/csv"]},
+        "original_name": {"type": "string", "minLength": 1},
+        "acquisition_path": {"type": "string"},
+        "hash_verified_against": {"type": "string"},
+        "page_count": {"type": ["integer", "null"], "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "membership": {
+      "description": "Role of this artifact in one work; multi-work memberships live in the package only while K keys source_artifacts UNIQUE(artifact_sha256) (M-07)",
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "required": ["work_id", "role", "source_label"],
+        "properties": {
+          "work_id": {"type": "string", "minLength": 1},
+          "role": {"enum": ["main_article", "appendix", "supplement", "instrument", "data", "code", "preregistration", "correction", "unknown"]},
+          "source_label": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "justification": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "work": {
+      "type": "object", "required": ["work_id", "identity_basis"],
+      "properties": {
+        "work_id": {"type": "string", "minLength": 1},
+        "identity_basis": {"enum": ["doi", "isbn", "catalog_id", "bibliographic_fallback_proposal"]},
+        "doi": {"type": ["string", "null"]},
+        "title": {"type": "string"},
+        "match_proposal_id": {"type": ["string", "null"], "description": "Set when identity came from the bibliographic fallback; never an automatic merge (C-03)"}
+      },
+      "additionalProperties": false
+    },
+    "version": {
+      "type": "object", "required": ["relation_to_published"],
+      "properties": {
+        "relation_to_published": {"enum": ["version_of_record", "accepted_manuscript", "preprint", "corrected_version", "unresolved"]},
+        "evidence": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "rights": {
+      "type": "object", "required": ["local_processing", "external_evaluation", "redistribution", "sensitive_data"],
+      "properties": {
+        "local_processing": {"enum": ["allowed", "unknown"]},
+        "external_evaluation": {"enum": ["development_family_auth1", "runpod_screen_auth", "refused", "unknown"]},
+        "redistribution": {"enum": ["private_only", "excerpts_allowed", "unknown"]},
+        "sensitive_data": {"enum": ["none_known", "transcript_derived", "unknown"]}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

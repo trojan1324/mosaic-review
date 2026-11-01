@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/stage-state.schema.json",
+  "title": "Stage attempt state with retry eligibility (FINAL v2 §11.2; audit M-48, M-49)",
+  "x-mosaic-type": null,
+  "$comment": "Retry rule: unknown_outcome is never retry-eligible until reconciled; writer_lock_busy is never eligible for the single transport retry. Enforced in code by mosaic.stage_state.retry_eligible and checked by the validator.",
+  "type": "object",
+  "required": ["task_key", "attempt_id", "stage", "state", "retry_eligible", "attempt_number"],
+  "properties": {
+    "task_key": {"type": "string", "pattern": "^task-[0-9a-f]{64}$"},
+    "attempt_id": {"type": "string", "pattern": "^attempt-[0-9a-f]{32}$"},
+    "stage": {"enum": ["register", "capture", "recover", "inventory", "extract", "verify", "materialize", "project"]},
+    "state": {"enum": ["planned", "admitted", "running", "completed", "retryable_failed", "blocked", "quarantined", "canceled", "unknown_outcome", "writer_lock_busy"]},
+    "retry_eligible": {"type": "boolean"},
+    "reconciled": {"type": "boolean"},
+    "attempt_number": {"type": "integer", "minimum": 1, "maximum": 2},
+    "detail": {"type": "string"}
+  },
+  "allOf": [
+    {"if": {"properties": {"state": {"const": "unknown_outcome"}, "reconciled": {"const": false}}, "required": ["state"]},
+     "then": {"properties": {"retry_eligible": {"const": false}}}},
+    {"if": {"properties": {"state": {"const": "writer_lock_busy"}}, "required": ["state"]},
+     "then": {"properties": {"retry_eligible": {"const": false}}}},
+    {"if": {"properties": {"state": {"enum": ["completed", "blocked", "quarantined", "canceled"]}}, "required": ["state"]},
+     "then": {"properties": {"retry_eligible": {"const": false}}}}
+  ],
+  "additionalProperties": false
+}

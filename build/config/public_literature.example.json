@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "model": "gpt-6-sol",
+  "cap_usd": 20.0,
+  "ledger_path": "public-ledgers/literature_assistant_calls.jsonl",
+  "input_upper_usd_per_million": 6.0,
+  "output_upper_usd_per_million": 20.0
+}

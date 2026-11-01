@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/model-source-policy.schema.json",
+  "x-mosaic-type": null,
+  "type": "object",
+  "required": ["version", "source_audit", "units", "cells", "counts"],
+  "properties": {
+    "version": {"enum": ["mosaic.model-source-policy/1", "mosaic.model-source-policy/2", "mosaic.model-source-policy/3", "mosaic.model-source-policy/4", "mosaic.model-source-policy/5"]},
+    "source_audit": {"const": "unassessed"},
+    "counts": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+    "units": {"type": "array", "items": {"type": "object",
+      "required": ["unit_id", "text_region_id", "start", "end", "status", "reasons"],
+      "properties": {
+        "unit_id": {"type": "string", "minLength": 1},
+        "text_region_id": {"$ref": "common.schema.json#/$defs/object_ref"},
+        "start": {"type": "integer", "minimum": 0}, "end": {"type": "integer", "minimum": 1},
+        "status": {"enum": ["body_candidate", "withheld"]},
+        "reasons": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }, "additionalProperties": false}},
+    "fragments": {"type": "array", "items": {"type": "object",
+      "required": ["unit_id", "parent_unit_id", "text_region_id", "start", "end", "text_sha256"],
+      "properties": {
+        "unit_id": {"type": "string", "pattern": "^fragment:[0-9a-f]{64}$"},
+        "parent_unit_id": {"type": "string", "minLength": 1},
+        "text_region_id": {"$ref": "common.schema.json#/$defs/object_ref"},
+        "start": {"type": "integer", "minimum": 0}, "end": {"type": "integer", "minimum": 1},
+        "text_sha256": {"$ref": "common.schema.json#/$defs/sha256"}
+      }, "additionalProperties": false}},
+    "cells": {"type": "array", "items": {"type": "object",
+      "required": ["unit_id", "witness_id", "text_region_id", "start", "end", "field"],
+      "properties": {
+        "unit_id": {"type": "string", "minLength": 1},
+        "witness_id": {"$ref": "common.schema.json#/$defs/witness_ref"},
+        "text_region_id": {"$ref": "common.schema.json#/$defs/object_ref"},
+        "start": {"type": "integer", "minimum": 0}, "end": {"type": "integer", "minimum": 1},
+        "field": {"enum": ["item_wording", "anchor"]}
+      }, "additionalProperties": false}}
+  }, "additionalProperties": false,
+  "if": {"properties": {"version": {"enum": ["mosaic.model-source-policy/2", "mosaic.model-source-policy/3", "mosaic.model-source-policy/4", "mosaic.model-source-policy/5"]}}},
+  "then": {"required": ["fragments"]},
+  "else": {"not": {"required": ["fragments"]}}
+}

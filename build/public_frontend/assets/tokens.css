@@ -1,0 +1,119 @@
+/* MOSAIC - design tokens. Direction: Overhead signs.
+   Prefix: --rp-  (research platform). The prefix predates the name and stays, so nothing has to be renamed.
+   Rule of thumb: blue = published evidence and navigation, green = the researcher's own layer,
+   ink = rules and commit actions, dashed = unconfirmed, proposed or generated. */
+
+:root {
+  /* ---------- colour: primitives ---------- */
+  --rp-blue-700: #003896;   /* anchor. Sign bands, primary buttons, links, arrow tiles */
+  --rp-blue-800: #00266b;   /* hover / pressed on blue */
+  --rp-blue-100: #e4ebf8;   /* evidence tint: opened record, "Printed in", info banner */
+  --rp-blue-050: #f3f6fc;   /* hover on white rows */
+
+  --rp-green-500: #aed36a;  /* anchor. Fills for anything that is the researcher's */
+  --rp-green-600: #9bc452;  /* hover / pressed on green */
+  --rp-green-100: #e9f3d3;  /* yours tint: notes inside long lists */
+  --rp-green-900: #2c4408;  /* rare: small marks on green-100 */
+
+  --rp-ink-900: #0f1319;    /* text, 3px record rules, field borders, commit buttons */
+  --rp-ink-700: #424a58;    /* secondary text                      8.9:1 on white */
+  --rp-ink-500: #5b6472;    /* captions, missing values            6.0:1 on white, 5.3:1 on grey-100 */
+  --rp-grey-300: #c5cbd4;   /* disabled borders */
+  --rp-grey-200: #dde1e7;   /* hairlines */
+  --rp-grey-100: #eef0f3;   /* path band, snapshot boxes, skeletons, placeholders */
+  --rp-white: #ffffff;
+
+  --rp-amber-100: #fcf2d9;  --rp-amber-800: #7a4b00;   /* caution: unchecked readings, stale backup, drafts */
+  --rp-red-100: #fbeae8;    --rp-red-800: #96201c;     /* problem: failed requests, storage trouble */
+
+  /* ---------- colour: semantic ---------- */
+  --rp-page: var(--rp-white);
+  --rp-text: var(--rp-ink-900);
+  --rp-text-2: var(--rp-ink-700);
+  --rp-text-3: var(--rp-ink-500);
+  --rp-link: var(--rp-blue-700);
+  --rp-link-hover: var(--rp-blue-800);
+
+  --rp-sign-bg: var(--rp-blue-700);
+  --rp-sign-fg: var(--rp-white);
+  --rp-sign-keyline: var(--rp-white);
+  --rp-sign-active-bg: var(--rp-white);
+  --rp-sign-active-fg: var(--rp-blue-700);
+
+  --rp-evidence: var(--rp-blue-700);
+  --rp-evidence-tint: var(--rp-blue-100);
+  --rp-yours: var(--rp-green-500);
+  --rp-yours-fg: var(--rp-ink-900);
+  --rp-yours-tint: var(--rp-green-100);
+  --rp-commit-bg: var(--rp-ink-900);       /* "Keep it" inside a green panel */
+  --rp-commit-fg: var(--rp-white);
+  --rp-draft-line: var(--rp-ink-500);      /* always dashed */
+
+  --rp-rule-strong: 3px solid var(--rp-ink-900);   /* between records, directory-style */
+  --rp-rule: 1px solid var(--rp-grey-200);
+  --rp-keyline: 2px solid var(--rp-sign-keyline);  /* between compartments on a sign */
+  --rp-field-border: 2px solid var(--rp-ink-900);
+
+  --rp-focus-ring: 3px solid var(--rp-ink-900);
+  --rp-focus-halo: 0 0 0 6px var(--rp-green-500);  /* keeps focus visible on the blue band */
+
+  /* ---------- type ---------- */
+  --rp-font-ui: 'Encode Sans', 'Helvetica Neue', system-ui, sans-serif;
+  --rp-font-sign: 'Encode Sans Semi Condensed', 'Encode Sans', 'Arial Narrow', sans-serif;
+  --rp-font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --rp-font-verbatim: var(--rp-font-ui);   /* quoted source wording. One switch if a serif is wanted later. */
+
+  /* size / line-height pairs */
+  --rp-display: 700 56px/60px var(--rp-font-sign);
+  --rp-h1: 700 32px/38px var(--rp-font-sign);
+  --rp-h2: 700 25px/30px var(--rp-font-sign);
+  --rp-h3: 700 20px/26px var(--rp-font-sign);
+  --rp-sign-label: 600 14px/18px var(--rp-font-sign);     /* uppercase, +0.06em */
+  --rp-nav: 600 18px/22px var(--rp-font-sign);
+  --rp-button: 600 16px/20px var(--rp-font-sign);
+  --rp-label: 700 15.5px/20px var(--rp-font-sign);
+  --rp-verbatim: 400 18px/27px var(--rp-font-verbatim);
+  --rp-verbatim-lg: 400 22px/32px var(--rp-font-verbatim);
+  --rp-body: 400 15px/23px var(--rp-font-ui);
+  --rp-body-s: 400 14px/21px var(--rp-font-ui);
+  --rp-caption: 400 13.5px/20px var(--rp-font-ui);
+  --rp-mono: 400 13px/18px var(--rp-font-mono);
+
+  /* ---------- space, size, shape ---------- */
+  --rp-s-1: 4px;  --rp-s-2: 8px;  --rp-s-3: 12px; --rp-s-4: 16px; --rp-s-5: 20px;
+  --rp-s-6: 24px; --rp-s-8: 32px; --rp-s-10: 40px; --rp-s-14: 56px;
+
+  --rp-radius-control: 4px;   /* buttons, tiles, fields, tags */
+  --rp-radius-sign: 6px;      /* section signs, panels, opened-record block */
+
+  --rp-band-h: 84px;          /* top sign band, desktop */
+  --rp-band-h-tablet: 72px;
+  --rp-band-h-phone: 56px;
+  --rp-path-h: 52px;
+  --rp-control-h: 44px;       /* default button, arrow tile */
+  --rp-control-h-sm: 40px;
+  --rp-control-h-lg: 52px;
+  --rp-field-h: 48px;
+  --rp-touch-min: 44px;
+
+  --rp-logo-h-band: 40px;     /* height of the logo mark in the top band */
+  --rp-logo-h-band-tablet: 36px;
+  --rp-logo-h-band-phone: 32px;   /* never below 32 with the regular cut; use #logo-mark-small under that */
+
+  --rp-gutter: 32px;          /* page side padding, desktop */
+  --rp-gutter-phone: 16px;
+  --rp-panel-w: 420px;        /* keep panel, source passage panel */
+  --rp-rail-w: 264px;         /* filter rail, reader outline */
+  --rp-read-max: 700px;       /* reading column */
+
+  --rp-shadow-overlay: 0 12px 32px rgba(15, 19, 25, 0.28);   /* sheets, dialogs, toasts only */
+
+  --rp-z-band: 20; --rp-z-panel: 30; --rp-z-overlay: 40; --rp-z-toast: 50;
+
+  --rp-ease: cubic-bezier(0.2, 0, 0, 1);
+  --rp-dur: 160ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --rp-dur: 0ms; }
+}

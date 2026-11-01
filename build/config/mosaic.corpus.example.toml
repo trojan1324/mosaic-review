@@ -1,0 +1,34 @@
+# Copy this file and replace every REPLACE value. Explicit files only.
+version = "mosaic-public-build/v1"
+profile = "corpus"
+
+[sources]
+root = "my-pdfs"
+files = ["REPLACE-article.pdf"]
+permission = "user_declared_permitted"
+
+[run]
+root = "run/my-corpus-v1"
+
+[runtime]
+kind = "local_open_weights"
+base_url = "http://127.0.0.1:8000/v1"
+model = "REPLACE-model-id"
+revision = "REPLACE-immutable-upstream-revision"
+tokenizer_revision = "REPLACE-immutable-upstream-revision"
+# Use model_files_sha256 returned by inventory-model, not a single weight hash.
+weights_sha256 = "REPLACE-model-tree-hash"
+license = "REPLACE-model-license-reference"
+
+[view]
+columns = ["title", "authors", "journal", "year"]
+default_screen = "papers"
+sort = "distinct_article_count_desc"
+
+[serve]
+port = 8798
+
+[jev]
+# Advice is invoked after extraction through its separate command.
+enabled = false
+replay_only = true

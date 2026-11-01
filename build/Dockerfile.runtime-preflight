@@ -1,0 +1,13 @@
+# CPU-only Linux environment gate for MOSAIC's pinned public runtime.
+# It intentionally performs no model download, GPU allocation, PDF capture, or extraction.
+# Build only from an allowlisted public-export staging directory. Never pass a
+# private worktree, corpus, frozen-results store, or a directory containing .env
+# files as the Docker build context.
+FROM vllm/vllm-openai@sha256:6ee133356d49ed24cee03dd0cda3d3980279a11c107ce3e752c89e76540f41c9
+
+WORKDIR /opt/mosaic
+COPY . /opt/mosaic
+
+# Invoke with an output directory mounted outside this image. The caller supplies
+# a bounded --deadline-epoch and retains Docker's immutable image-ID receipt.
+ENTRYPOINT ["python3", "-m", "mosaic.public_linux_environment", "preflight"]

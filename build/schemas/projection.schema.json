@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/projection.schema.json",
+  "title": "Named projection into a destination with omission report and rollback target (FINAL v2 §4.2, §10.1, G10)",
+  "x-mosaic-type": "projection",
+  "allOf": [{"$ref": "common.schema.json#/$defs/envelope"}],
+  "type": "object",
+  "required": ["destination", "mode", "projected_count", "omitted", "receipt"],
+  "properties": {
+    "type": {"const": "projection"},
+    "schema_version": {"const": "mosaic.projection/1"},
+    "source_package_id": true, "created_by": true, "recipe_id": true, "provenance_ids": true,
+    "status": {"enum": ["dry_run", "applied", "rolled_back"]},
+    "destination": {"enum": ["kb_v2_disposable_copy", "evoke_measure_catalog_projection", "kb_study_view_28", "graph_search"]},
+    "mode": {"enum": ["dry_run", "applied"]},
+    "projected_count": {"type": "integer", "minimum": 0},
+    "omitted": {"type": "array", "items": {"type": "object", "required": ["subject", "reason"], "properties": {"subject": {"type": "string"}, "reason": {"type": "string"}}, "additionalProperties": false}},
+    "receipt": {"type": "object", "required": ["target_sha256_before", "target_sha256_after"],
+                "properties": {"target_sha256_before": {"type": ["string", "null"]}, "target_sha256_after": {"type": ["string", "null"]},
+                               "rollback_target": {"type": ["string", "null"]}, "idempotency_key": {"type": "string"}},
+                "additionalProperties": false}
+  },
+  "additionalProperties": false
+}

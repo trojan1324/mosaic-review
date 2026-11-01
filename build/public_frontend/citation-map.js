@@ -1,0 +1,53 @@
+'use strict';
+const $=s=>document.querySelector(s),core=CitationMapCore;
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const label=w=>w?.title||w?.work_id||'Title not recorded';
+let state,id='',workRequest=0,searchRequest=0,searchText='',searchMode='works',synthetic=null;
+async function get(url){if(synthetic)return core.syntheticResponse(synthetic,url);const r=await fetch(url);if(!r.ok)throw Error(`Citation request failed (${r.status}).`);return r.json()}
+function error(e){$('#citation-status').textContent=e.message}
+function action(fn){return ()=>Promise.resolve().then(fn).catch(error)}
+function workLink(w){return w?.work_id?`<button class="cm-open" data-work="${esc(w.work_id)}">${esc(label(w))}</button>`:esc(label(w))}
+function provenance(x){const p=x.provenance||{},legacy=p.kind==='legacy_campaign_metadata';return `${legacy?'Legacy bibliography metadata · printed reference not yet verified':esc(p.kind||'Provenance not recorded')}${p.page?` · page ${esc(p.page)}`:''}${p.unit_id?` · unit ${esc(p.unit_id)}`:''}${p.file_sha256?` · file SHA-256 ${esc(p.file_sha256)}`:''}${p.record_id!==undefined?` · record ${esc(p.record_id)}`:''}${x.admitted_source_pdf_sha256?` · admitted PDF SHA-256 ${esc(x.admitted_source_pdf_sha256)}`:''}${x.legacy_source_id?` · legacy source ID ${esc(x.legacy_source_id)}`:''}${x.citation_source_version_status?` · bibliography version: ${esc(x.citation_source_version_status)}`:''}${x.resolution_basis?` · ${esc(x.resolution_basis)}`:''}`}
+function rows(a,incoming=false){return a.length?`<ul class="cm-list">${a.map(x=>`<li>${incoming?workLink(x):x.target?workLink(x.target):'<strong>Unresolved reference</strong>'}${!incoming?`<p>${esc(x.literal_reference)}</p><span class="rp-caption">${esc(x.resolution_status||'unresolved')}</span>`:''}<details><summary>Source and identity evidence</summary><p class="cm-provenance">${provenance(x)}</p></details></li>`).join('')}</ul>`:'<p class="rp-missing">No available rows.</p>'}
+function more(kind,cursor,total,loaded){return `<p class="rp-caption">${loaded.toLocaleString()} of ${Number(total).toLocaleString()} available rows shown.</p>`+(cursor!==null?`<button class="rp-btn rp-btn--secondary cm-more" data-kind="${kind}" data-cursor="${esc(cursor)}"><span class="rp-btn__label">Load more ${kind}</span><span class="rp-btn__arrow">→</span></button>`:'')}
+function peers(a,kind){return a.length?a.map(p=>`<article class="cm-peer">${workLink(p)}<p class="rp-caption">${kind==='co'?`Co-cited by ${p.count_is_lower_bound?'at least ':''}${p.shared_citing_work_count} admitted local works.`:`Shares ${p.shared_resolved_reference_total??p.shared_resolved_reference_count??0} resolved references.`}${kind==='bridge'?' Recommendation only.':''}</p>${p.shared_resolved_references?.length?`<details><summary>Why this connection?</summary><ul>${p.shared_resolved_references.map(w=>`<li>${workLink(w)}</li>`).join('')}</ul>${p.shared_resolved_reference_total>p.shared_resolved_references.length?'<p>First 50 shared references shown.</p>':''}</details>`:''}</article>`).join(''):'<p class="rp-missing">No connections in the available local graph.</p>'}
+function network(){
+  const nodes=[],seen=new Set([id]);const add=(w,kind)=>{if(w?.work_id&&!seen.has(w.work_id)){seen.add(w.work_id);nodes.push({w,kind})}};
+  state.references.filter(x=>x.target).slice(0,10).forEach(x=>add(x.target,'out'));state.incoming.slice(0,10).forEach(x=>add(x,'in'));state.coupling.slice(0,8).forEach(x=>add(x,'inferred'));
+  const center={x:450,y:200};
+  return `<section><h2 class="rp-h2">Explore this neighborhood</h2><p class="rp-caption">Solid arrows follow resolved citation identities; dashed lines show shared-reference suggestions. Up to 28 neighbors from loaded rows are shown. The lists below retain all available reference rows.</p><svg class="cm-network" viewBox="0 0 900 400" role="group" aria-label="Interactive local citation neighborhood"><defs><marker id="citation-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z"/></marker></defs>${nodes.map((n,i)=>{const a=2*Math.PI*i/nodes.length,x=450+330*Math.cos(a),y=200+160*Math.sin(a),from=n.kind==='in'?{x,y}:center,to=n.kind==='in'?center:{x,y};return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" data-kind="${n.kind}" ${n.kind!=='inferred'?'marker-end="url(#citation-arrow)"':''}/><g class="cm-node cm-open" role="button" tabindex="0" data-work="${esc(n.w.work_id)}" aria-label="Open ${esc(label(n.w))}"><title>${esc(label(n.w))}</title><circle cx="${x}" cy="${y}" r="9"/><text x="${x}" y="${y+22}" text-anchor="middle">${esc(label(n.w).slice(0,27))}${label(n.w).length>27?'…':''}</text></g>`}).join('')}<circle cx="450" cy="200" r="14" data-kind="focus"/><text x="450" y="231" text-anchor="middle">Selected article</text></svg></section>`;
+}
+function bind(){document.querySelectorAll('.cm-open').forEach(e=>{e.onclick=action(()=>openWork(e.dataset.work));if(e.tagName.toLowerCase()==='g')e.onkeydown=event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();e.onclick()}}});document.querySelectorAll('.cm-more').forEach(e=>e.onclick=action(()=>page(e.dataset.kind,e.dataset.cursor)))}
+function render(){const w=state.work;$('#citation-work').hidden=false;$('#citation-work').innerHTML=`<div class="rp-path"><span class="rp-here">YOU ARE HERE</span><span>${esc(label(w))}</span></div><p class="rp-caption">${esc(w.doi||'DOI not recorded')} · ${esc(w.identity_status||'identity status not recorded')}</p><section class="cm-candidate">These are local bibliography relationships. Legacy DOI matches identify candidate targets; they do not verify the printed reference or establish that an article supports a claim.</section>${network()}<div class="cm-grid"><section><h2 class="rp-h2">All available reference rows</h2>${rows(state.references)}${more('references',state.references_cursor,state.references_total,state.references.length)}</section><section><h2 class="rp-h2">Incoming local citations</h2>${rows(state.incoming,true)}${more('incoming',state.incoming_cursor,state.incoming_total,state.incoming.length)}</section></div><section><h2 class="rp-h2">Shared-reference peers</h2><p class="rp-caption">Up to 20 peers, ordered by shared resolved references.</p>${peers(state.coupling,'coupling')}</section><section><h2 class="rp-h2">Co-citation peers</h2><p class="rp-caption">Up to 20 works cited alongside this article.${state.co_citation_scan_truncated?' The bounded local scan was truncated; this ranking is incomplete.':''}</p>${peers(state.co_citation,'co')}</section><section><h2 class="rp-h2">Potential bridges</h2><p class="rp-caption">Suggestions based on shared references. These repeat the explainable peer ranking; they are not additional citation edges or validated relevance judgments.</p>${peers(state.bridge_candidates,'bridge')}</section>`;bind()}
+async function openWork(work,push=true){const n=++workRequest;id=work;$('#citation-status').textContent='Loading article relationships…';const r=await get(core.workUrl(work));if(n!==workRequest)return;state=core.normalizeWork(r);if(push)history.pushState({},'',`?work=${encodeURIComponent(work)}`);$('#citation-results').hidden=true;render();$('#citation-work').scrollIntoView();$('#citation-status').textContent=synthetic?'Fictional demonstration. No real citation data.':'Local article relationships loaded.'}
+async function page(kind,cursor){const n=++workRequest,current=id,r=await get(core.workUrl(current,cursor));if(n!==workRequest||current!==id)return;core.appendPage(state,r,kind);render()}
+async function search(q='',cursor=null,mode=searchMode){
+  const n=++searchRequest;searchText=q;searchMode=mode;
+  const r=await get(core.searchUrl(q,cursor,mode));if(n!==searchRequest)return;
+  const target=$('#citation-results');if(cursor===null)target.innerHTML=`<p class="rp-caption">${Number(r.total||0).toLocaleString()} ${mode==='references'?'individual reference rows':'article matches'}. ${mode==='references'?'Unresolved references remain separate; a text match is a discovery lead.':''}</p>`;
+  target.querySelector('.cm-search-more')?.remove();
+  target.insertAdjacentHTML('beforeend',(r.items||[]).map(x=>mode==='references'?
+    `<article class="cm-row"><p>${esc(x.literal_reference)}</p><p class="rp-caption">Cited in ${workLink(x.citing_work)} · ${esc(x.resolution_status)}</p><details><summary>Source and identity evidence</summary><p class="cm-provenance">${provenance(x)}</p></details></article>`:
+    `<article class="cm-row">${workLink(x)}<p class="rp-caption">${esc(x.doi||'DOI not recorded')}</p></article>`).join('')||'<p class="rp-missing">No local matches for this search.</p>');
+  if(r.next_cursor!==null&&r.next_cursor!==undefined){target.insertAdjacentHTML('beforeend','<button class="rp-btn rp-btn--secondary cm-search-more">More matches →</button>');target.querySelector('.cm-search-more').onclick=action(()=>search(searchText,r.next_cursor,mode))}bind();
+}
+$('#citation-search').onsubmit=e=>{e.preventDefault();workRequest++;$('#citation-work').hidden=true;$('#citation-results').hidden=false;action(()=>search($('#citation-q').value.trim(),null,$('#citation-mode').value))()};
+addEventListener('popstate',()=>{const work=new URL(location.href).searchParams.get('work');if(work)action(()=>openWork(work,false))();else{$('#citation-work').hidden=true;$('#citation-results').hidden=false;workRequest++;id=''}});
+(async()=>{
+  let health;
+  try{health=await get('/api/citations/health')}
+  catch(e){
+    const r=await fetch('citation-map-data.json');if(!r.ok)throw e;
+    const data=await r.json();if(data?.manifest?.synthetic!==true)throw e;
+    synthetic=data;health=await get('/api/citations/health');
+  }
+  $('#citation-status').textContent=synthetic?'Fictional demonstration. No real citation data.':
+    `${Number(health.source_record_count||0).toLocaleString()} available reference rows · ${Number(health.resolved_edge_count||0).toLocaleString()} reference rows with resolved targets · ${Number(health.unresolved_reference_count||0).toLocaleString()} unresolved. Counts cover admitted local sources only.${health.provenance_status==='bound_v2'?' Frozen provenance verified.':''}`;
+  // A search submitted while health loads owns the page. Initialization may
+  // only supply a default when the researcher has not already interacted.
+  if(searchRequest===0&&workRequest===0){
+    await search();
+    const work=new URL(location.href).searchParams.get('work');
+    if(work&&searchRequest===1&&workRequest===0)await openWork(work,false);
+  }
+})().catch(error);

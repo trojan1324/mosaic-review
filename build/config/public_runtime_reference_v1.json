@@ -1,0 +1,31 @@
+{
+  "version": "mosaic-public-runtime-reference/v1",
+  "mode": "fictional_fixture_replay_only",
+  "runtime": {
+    "endpoint_policy": "no_endpoint_in_fixture_replay",
+    "remote": false,
+    "live_linux_loopback_status": "UNVERIFIED_BLOCKED"
+  },
+  "driver": {
+    "candidate": "public-fictional-fixture-replay-v1",
+    "run_id": "public-fixture-replay-v1",
+    "served_model_name": "screen-candidate",
+    "model": "Qwen/Qwen3.6-27B",
+    "revision": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+    "tokenizer_runtime_version": "0.23.2",
+    "tokenizer_artifact_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "grammar_compiler": "xgrammar Grammar.from_json_schema + Grammar.from_ebnf",
+    "xgrammar_observed_version": "0.2.8",
+    "max_measure_stages_per_paper": 1,
+    "max_request_seconds": 5,
+    "request_cap": 8,
+    "output_token_cap": 49152,
+    "wall_clock_cap_seconds": 40,
+    "article_request_cap": 8
+  },
+  "dependency_status": {
+    "xgrammar_cpu_fixture_closure": "REQUIRES_REAL_WHEELS: xgrammar 0.2.8, apache-tvm-ffi, pydantic, torch, transformers, numpy, typing-extensions",
+    "model_weights": "NOT_REQUIRED_FOR_RECORDED_FIXTURE_REPLAY",
+    "vllm_distribution_container_accelerator": "UNKNOWN_BLOCKS_LIVE_RUNTIME"
+  }
+}

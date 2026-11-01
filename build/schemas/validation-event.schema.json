@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/validation-event.schema.json",
+  "title": "Gate result with executing actor, or a usage/state event (FINAL v2 §8.1 actor table; audit M-27, M-28)",
+  "x-mosaic-type": "validation-event",
+  "allOf": [{"$ref": "common.schema.json#/$defs/envelope"}],
+  "type": "object",
+  "required": ["event_kind", "recorded_utc", "actor"],
+  "properties": {
+    "type": {"const": "validation-event"},
+    "schema_version": {"const": "mosaic.validation-event/1"},
+    "source_package_id": true, "created_by": true, "recipe_id": true, "provenance_ids": true,
+    "status": {"enum": ["recorded"]},
+    "event_kind": {"enum": ["gate", "adjudication", "usage", "stage_transition", "jev_advisory", "candidate_note"]},
+    "gate": {"enum": ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10"]},
+    "gate_order": {"type": "integer", "minimum": 1, "maximum": 10},
+    "actor": {"$ref": "common.schema.json#/$defs/actor"},
+    "subject_ids": {"type": "array", "items": {"type": "string"}},
+    "outcome": {"enum": ["pass", "fail", "flag", "not_applicable", "not_run"]},
+    "checks": {"type": "array", "items": {"type": "object", "required": ["check", "outcome"],
+               "properties": {"check": {"type": "string"}, "outcome": {"enum": ["pass", "fail", "flag", "not_applicable"]},
+                              "subject": {"type": "string"}, "detail": {"type": "string"}},
+               "additionalProperties": false}},
+    "checker_version": {"type": "string"},
+    "input_hashes": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/sha256"}},
+    "recorded_utc": {"$ref": "common.schema.json#/$defs/utc_timestamp"},
+    "detail": {"type": "object"}
+  },
+  "if": {"properties": {"event_kind": {"const": "gate"}}, "required": ["event_kind"]},
+  "then": {"required": ["gate", "gate_order", "outcome", "checks"]},
+  "additionalProperties": false
+}

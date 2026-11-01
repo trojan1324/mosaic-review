@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosaic.local/schemas/figure-equation.schema.json",
+  "title": "Figure, panel or equation region (FINAL v2 §4.2, §5.2)",
+  "x-mosaic-type": "figure-equation",
+  "allOf": [{"$ref": "common.schema.json#/$defs/envelope"}],
+  "type": "object",
+  "required": ["source_id", "page_id", "kind", "bbox", "recognition_status"],
+  "properties": {
+    "type": {"const": "figure-equation"},
+    "schema_version": {"const": "mosaic.figure-equation/1"},
+    "source_package_id": true, "created_by": true, "recipe_id": true, "provenance_ids": true,
+    "status": {"enum": ["captured", "unsupported"]},
+    "source_id": {"$ref": "common.schema.json#/$defs/object_ref"},
+    "page_id": {"$ref": "common.schema.json#/$defs/object_ref"},
+    "kind": {"enum": ["figure", "panel", "equation", "image_region"]},
+    "label": {"type": ["string", "null"]},
+    "bbox": {"description": "null only for a captioned figure whose graphic was not located; its pending region disposition says why (D-165)",
+             "oneOf": [{"$ref": "common.schema.json#/$defs/bbox"}, {"type": "null"}]},
+    "caption_witness_id": {"oneOf": [{"$ref": "common.schema.json#/$defs/object_ref"}, {"type": "null"}]},
+    "crop_sha256": {"oneOf": [{"$ref": "common.schema.json#/$defs/sha256"}, {"type": "null"}]},
+    "markup_candidates": {"type": "array", "items": {"type": "object", "required": ["format", "text"], "properties": {"format": {"enum": ["latex", "mathml"]}, "text": {"type": "string"}}, "additionalProperties": false}},
+    "recognition_status": {"enum": ["not_attempted", "recognized", "approximate_digitized", "unresolved"]}
+  },
+  "additionalProperties": false
+}
